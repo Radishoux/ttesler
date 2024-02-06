@@ -52,7 +52,7 @@ class _ImageFeedPageState extends State<ImageFeedPage> {
       imageUrls[category] = [];
     }
     final newImageUrls = await ImageRepository()
-        .fetchImageUrls(category, currentPage[category]!, 9);
+        .fetchImageUrls(category, currentPage[category]!, 18);
     setState(() {
       imageUrls[category]!.addAll(newImageUrls);
       currentPage[category] = currentPage[category]! + 1;
