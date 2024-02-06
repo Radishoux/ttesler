@@ -11,10 +11,6 @@ dependencies:
     sdk: flutter
   infinite_scroll_pagination: ^4.0.0
   dio: ^5.4.0
-  riverpod: ^2.5.0
-  riverpod_generator: ^2.3.11
-  json_serializable: ^6.7.1
-
 
 dev_dependencies:
   flutter_test:
