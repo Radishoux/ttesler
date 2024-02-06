@@ -28,6 +28,10 @@ class ImageFeedPage extends StatefulWidget {
 class _ImageFeedPageState extends State<ImageFeedPage> {
   String currentCategory = 'Tesla Model 3';
   Map<String, List<String>> imageUrls = {};
+  Map<String, int> currentPage = {
+    'Tesla Model 3': 1,
+    'Tesla Model Y': 1,
+  };
   ScrollController _scrollController = ScrollController();
 
   @override
@@ -46,9 +50,11 @@ class _ImageFeedPageState extends State<ImageFeedPage> {
     if (!imageUrls.containsKey(category)) {
       imageUrls[category] = [];
     }
-    final newImageUrls = await ImageRepository().fetchImageUrls(category, 5);
+    final newImageUrls = await ImageRepository()
+        .fetchImageUrls(category, currentPage[category]!, 5);
     setState(() {
       imageUrls[category]!.addAll(newImageUrls);
+      currentPage[category] = currentPage[category]! + 1;
     });
   }
 
@@ -62,8 +68,14 @@ class _ImageFeedPageState extends State<ImageFeedPage> {
             value: currentCategory == 'Tesla Model 3',
             onChanged: (value) {
               setState(() {
+                _scrollController
+                    .jumpTo(_scrollController.position.minScrollExtent);
                 currentCategory = value ? 'Tesla Model 3' : 'Tesla Model Y';
-                _fetchImages(currentCategory);
+                if (currentPage[currentCategory] == 1) {
+                  _fetchImages(currentCategory);
+                }
+                _scrollController
+                    .jumpTo(_scrollController.position.minScrollExtent);
               });
             },
           ),
