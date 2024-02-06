@@ -7,7 +7,7 @@ void main() {
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({Key? key});
+  const MainApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +27,28 @@ class ImageFeedPage extends StatefulWidget {
 
 class _ImageFeedPageState extends State<ImageFeedPage> {
   String currentCategory = 'Tesla Model 3';
-  String? currentImageUrl;
+  Map<String, List<String>> imageUrls = {};
+  ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _fetchImage();
+    _fetchImages(currentCategory);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _fetchImages(currentCategory);
+      }
+    });
   }
 
-  Future<void> _fetchImage() async {
-    final imageUrl = await ImageRepository().fetchImageUrl(currentCategory);
+  Future<void> _fetchImages(String category) async {
+    if (!imageUrls.containsKey(category)) {
+      imageUrls[category] = [];
+    }
+    final newImageUrls = await ImageRepository().fetchImageUrls(category, 5);
     setState(() {
-      currentImageUrl = imageUrl;
+      imageUrls[category]!.addAll(newImageUrls);
     });
   }
 
@@ -46,23 +56,25 @@ class _ImageFeedPageState extends State<ImageFeedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Switch Image Category'),
+        title: Text('Switch Image Category $currentCategory'),
         actions: <Widget>[
           Switch(
             value: currentCategory == 'Tesla Model 3',
             onChanged: (value) {
               setState(() {
                 currentCategory = value ? 'Tesla Model 3' : 'Tesla Model Y';
-                _fetchImage(); // Fetch new image based on the switch
+                _fetchImages(currentCategory);
               });
             },
           ),
         ],
       ),
-      body: Center(
-        child: currentImageUrl == null
-            ? const CircularProgressIndicator() // Show loading indicator while the image is null
-            : Image.network(currentImageUrl!),
+      body: ListView.builder(
+        controller: _scrollController,
+        itemCount: imageUrls[currentCategory]!.length,
+        itemBuilder: (context, index) {
+          return Image.network(imageUrls[currentCategory]![index]);
+        },
       ),
     );
   }
